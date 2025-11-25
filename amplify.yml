@@ -8,6 +8,7 @@ applications:
             - npm ci
         build:
           commands:
+            - echo "NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=$NEXT_PUBLIC_GOOGLE_MAPS_API_KEY" >> .env.production
             - npm run build
       artifacts:
         baseDirectory: out
