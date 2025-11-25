@@ -9,6 +9,14 @@ const STATIC_ASSETS = [
   '/icons/icon-512x512.png'
 ];
 
+// キャッシュしない外部ドメインのリスト
+const EXCLUDED_DOMAINS = [
+  'maps.googleapis.com',
+  'maps.gstatic.com',
+  'fonts.googleapis.com',
+  'fonts.gstatic.com'
+];
+
 // インストールイベント: 静的アセットをキャッシュ
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -37,23 +45,27 @@ self.addEventListener('activate', (event) => {
 
 // フェッチイベント: ネットワーク優先、失敗時はキャッシュを使用
 self.addEventListener('fetch', (event) => {
-  // Google Maps APIやその他の外部リソースはキャッシュしない
-  if (
-    event.request.url.includes('maps.googleapis.com') ||
-    event.request.url.includes('maps.gstatic.com')
-  ) {
+  // GETリクエスト以外はキャッシュしない
+  if (event.request.method !== 'GET') {
+    return;
+  }
+
+  // 外部ドメインへのリクエストはキャッシュしない
+  const isExcludedDomain = EXCLUDED_DOMAINS.some((domain) =>
+    event.request.url.includes(domain)
+  );
+  if (isExcludedDomain) {
     return;
   }
 
   event.respondWith(
     fetch(event.request)
-      .then((response) => {
-        // 成功したレスポンスをキャッシュに保存
-        if (response.status === 200) {
+      .then(async (response) => {
+        // 成功したレスポンス（2xx）をキャッシュに保存
+        if (response.ok) {
           const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseClone);
-          });
+          const cache = await caches.open(CACHE_NAME);
+          await cache.put(event.request, responseClone);
         }
         return response;
       })
