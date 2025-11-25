@@ -20,6 +20,13 @@ interface StoreFormData {
   rating: number;
 }
 
+// フォームデータの初期値
+const initialFormData: StoreFormData = {
+  storeName: '',
+  review: '',
+  rating: 3,
+};
+
 // モーダルコンポーネント
 interface StoreRegistrationModalProps {
   isOpen: boolean;
@@ -161,11 +168,7 @@ export default function Map() {
   // タップした位置
   const [tappedPosition, setTappedPosition] = useState<{ lat: number; lng: number } | null>(null);
   // フォームデータ
-  const [formData, setFormData] = useState<StoreFormData>({
-    storeName: '',
-    review: '',
-    rating: 3,
-  });
+  const [formData, setFormData] = useState<StoreFormData>(initialFormData);
 
   // 地図クリック時のハンドラ
   const handleMapClick = useCallback((e: google.maps.MapMouseEvent) => {
@@ -174,11 +177,7 @@ export default function Map() {
         lat: e.latLng.lat(),
         lng: e.latLng.lng(),
       });
-      setFormData({
-        storeName: '',
-        review: '',
-        rating: 3,
-      });
+      setFormData(initialFormData);
       setIsModalOpen(true);
     }
   }, []);
@@ -207,11 +206,7 @@ export default function Map() {
       lat: center.lat + (Math.random() - 0.5) * 0.01,
       lng: center.lng + (Math.random() - 0.5) * 0.01,
     });
-    setFormData({
-      storeName: '',
-      review: '',
-      rating: 3,
-    });
+    setFormData(initialFormData);
     setIsModalOpen(true);
   }, []);
 
